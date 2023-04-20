@@ -1,9 +1,9 @@
 #include <DHT.h>
 #include <ESP8266WiFi.h>
-String apiKey = "34YOGANZEXI977D4";     //  API key here
+String apiKey = "APIKEY";     //  API key here
 const char* server = "api.thingspeak.com";
-const char *ssid =  "realme 7 Pro";     // Enter your WiFi Name
-const char *pass =  "9013f5b16e4b"; // Enter your WiFi Password
+const char *ssid =  "WiFi";     // Enter your WiFi Name
+const char *pass =  "Password"; // Enter your WiFi Password
 #define DHTPIN D0          // GPIO Pin where the DHT11 is connected
 DHT dht(DHTPIN, DHT11);
 WiFiClient client;
