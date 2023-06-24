@@ -1,10 +1,9 @@
 # Project-Gardenia
 A simple houseplant monitoring system with separate modules for each type of plant.
-Meant to be used in conjunction with the following hardware:
+Meant to be used in conjunction with Thingspeak Cloud channels, with the following hardware:
 1. NodeMCU ESP8266 microcontroller
 2. DHT11 temperature and humidity sensor
 3. Analog resistive soil moisture sensor
-Meant to be used with Thingspeak Cloud.
 
 This project was created originally for a college hardware project competition.
 Contributors: Urmika Chakraborty, Rajshekhar Bit, Sampriti Sarkar, Sayak Das, Rudradeep Kundu.
