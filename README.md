@@ -7,7 +7,7 @@ Meant to be used in conjunction with the following hardware:
 Meant to be used with Thingspeak Cloud.
 
 This project was created originally for a college hardware project competition.
-Contributors: Urmika Chakraborty, Rajshekhar Bit, Sampriti Sarkar, Sayak Das, Rudradeep Kundu
+Contributors: Urmika Chakraborty, Rajshekhar Bit, Sampriti Sarkar, Sayak Das, Rudradeep Kundu.
 
 Directions:
 1. Extract the files from the ZIP.
@@ -22,5 +22,5 @@ Directions:
 9. Open the serial monitor to check connection status.
 10. Use either the serial monitor or your ThingSpeak cloud channel to monitor plant health.
 
-Further improvements: Addition of automation, watering system and CO2 sensor provisions
+Further improvements: Addition of automation, watering system and CO2 sensor provisions.
 Updated occassionally.
