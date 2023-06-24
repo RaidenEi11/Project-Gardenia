@@ -1,104 +1,58 @@
+#include <ThingSpeak.h>
 #include <DHT.h>
 #include <ESP8266WiFi.h>
-String apiKey = "APIKEY";     //  API key here
-const char* server = "api.thingspeak.com";
-const char *ssid =  "WiFi";     // Enter your WiFi Name
-const char *pass =  "Password"; // Enter your WiFi Password
-#define DHTPIN D0          // GPIO Pin where the DHT11 is connected
+long channelNumber = 99999999; //enter the ThingSpeak channel ID here in the quotation marks given
+const char apiKey[] = "XXXXXXXXXXXX";     //  Enter the Write API key for your ThingSpeak channel in the quotation marks given
+const char *ssid =  "EnterWiFiname";     // Enter WiFi Name (SSID) in the quotation marks given
+const char *password =  "passwordhere"; // Enter your WiFi Password in the quotation marks given
+#define DHTPIN 3          // GPIO Pin connected to DHT11 is GPIO3, or pin D3
 DHT dht(DHTPIN, DHT11);
 WiFiClient client;
 
-const int moisturePin = A0;             // Moisture sensor pin
-unsigned long interval = 15000;
-unsigned long previousMillis = 0;
-unsigned long interval1 = 1000;
-unsigned long previousMillis1 = 0;
-float moisturePercentage;              // Moisture reading
-float h;                  // Variable for Humidity reading
-float t;                  // Variable for Temperature reading
+const int moiAnaPin = A0;             // Moisture sensor pin
+float moisture;              // Variable for Moisture reading
+float humidity;                  // Variable for Humidity reading
+float temperature;                  // Variable for Temperature reading
 
-void setup()
-{
-  Serial.begin(115200);
+void setup() {
+  Serial.begin(115200);     //specify baud rate
   delay(10);
   dht.begin();
-  Serial.println("Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, pass);
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");              // Print till not connected
+    Serial.print("Connecting to WiFi, watch your plants meanwhile...\n");              // Print till not connected
   }
   Serial.println("");
-  Serial.println("WiFi connected");
+  Serial.println("WiFi connection successful, welcome to Gardenia!");
+  ThingSpeak.begin(client);
 }
 
-void loop()
-{
-  unsigned long currentMillis = millis(); // Take current time
-
-  h = dht.readHumidity();     // Read humidity
-  t = dht.readTemperature();     // Read temperature
-
-  if (isnan(h) || isnan(t))
-  {
-    Serial.println("Failed to read from DHT sensor!");
+void loop() {
+  humidity = dht.readHumidity();     // Read humidity
+  temperature = dht.readTemperature();     // Read temperature
+  moisture = ( 100.00 - ( (analogRead(moiAnaPin) / 2023.00) * 100.00 ) );   //Formula for calculating soil moisture
+  
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("DHT sensor returning null, please check sensor, board or connection!");        //DHT sensor failure
+    delay(2000);
     return;
   }
 
-  moisturePercentage = ( 100.00 - ( (analogRead(moisturePin) / 1023.00) * 100.00 ) );   //Formula for calculating soil moisture
+  Serial.println("Soil Moisture percentage: %f percent. Temperature: %f degrees Celsius. Humidity: %f percent. Sending to ThingSpeak in 15s!", moisture, temperature, humidity);
+  //Moisture, temperature, humidity output on serial monitor
+  delay(10);
 
-  if ((unsigned long)(currentMillis - previousMillis1) >= interval1) {
-    Serial.print("Soil Moisture is  = ");
-    Serial.print(moisturePercentage);
-    Serial.println("%");
-    previousMillis1 = millis();
-  }
-
-if (moisturePercentage < 50) {
-  Serial.println("Water low!");   // Immediate watering required
+  if (moisturePercentage < 30) {
+    Serial.println("Water low!");   // Immediate watering required
 }
-if (moisturePercentage > 50 && moisturePercentage < 55) {
-  Serial.println("Watering needed soon!");    // Watering needed very soon
+  if (moisturePercentage > 30 && moisturePercentage < 50) {
+    Serial.println("Watering needed soon!");    // Watering needed very soon
 }
+  delay(15000);
 
-if ((unsigned long)(currentMillis - previousMillis) >= interval) {
-
-  sendThingspeak();           // Send data to Thingspeak cloud
-  previousMillis = millis();
-  client.stop();
-}
-
-}
-
-void sendThingspeak() {
-  if (client.connect(server, 80))
-  {
-    String postStr = apiKey;              // add API key in the postStr string
-    postStr += "&field1=";
-    postStr += String(moisturePercentage);    // Add moisture reading
-    postStr += "&field2=";
-    postStr += String(t);                 // Add temperature reading
-    postStr += "&field3=";
-    postStr += String(h);                  // Add humidity reading
-    postStr += "\r\n\r\n";
-
-    client.print("POST /update HTTP/1.1\n");
-    client.print("Host: api.thingspeak.com\n");
-    client.print("Connection: close\n");
-    client.print("X-THINGSPEAKAPIKEY: " + apiKey + "\n");
-    client.print("Content-Type: application/x-www-form-urlencoded\n");
-    client.print("Content-Length: ");
-    client.print(postStr.length());           // Send length of the string
-    client.print("\n\n");
-    client.print(postStr);                      // Send complete string
-    Serial.print("Moisture Percentage: ");
-    Serial.print(moisturePercentage);
-    Serial.print("%. Temperature: ");
-    Serial.print(t);
-    Serial.print(" C, Humidity: ");
-    Serial.print(h);
-    Serial.println("%. Sent to Thingspeak.");
-  }
+  ThingSpeak.setField(1, moisture);       //1st field denotes soil moisture
+  ThingSpeak.setField(2, temperature);                        //2nd field denotes temperature
+  ThingSpeak.setField(3, humidity);                        //3rd field denotes humidity
+  ThingSpeak.writeFields(channelNumber, apiKey);    //Write data to corresponding Thingspeak channel for the above 3 fields
 }
